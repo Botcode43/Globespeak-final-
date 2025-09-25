@@ -1,0 +1,19 @@
+# Django Settings
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+
+# Gemini AI API Key (for text summarization)
+GEMINI_API_KEY=your-gemini-api-key-here
+
+# Database (optional - defaults to SQLite)
+# DATABASE_URL=postgresql://user:password@localhost:5432/globespeak
+
+# Redis (for WebSocket channels)
+REDIS_URL=redis://localhost:6379/0
+
+# Email Settings (optional)
+# EMAIL_HOST=smtp.gmail.com
+# EMAIL_PORT=587
+# EMAIL_USE_TLS=True
+# EMAIL_HOST_USER=your-email@gmail.com
+# EMAIL_HOST_PASSWORD=your-app-password
