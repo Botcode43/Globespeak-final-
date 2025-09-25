@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Globespeak{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <!-- Welcome Section -->
+    <div class="mb-6 sm:mb-8 fade-in">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ user.username }}! 👋</h1>
+        <p class="text-gray-600 text-sm sm:text-base">Ready to break down language barriers? Choose your translation tool below.</p>
+    </div>
+    
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <!-- Text Translation -->
+        <a href="{% url 'text_translation' %}" class="group modern-card hover-lift">
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                        <span class="text-white text-lg sm:text-xl">📝</span>
+                    </div>
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Text Translation</h3>
+                <p class="text-gray-600 text-xs sm:text-sm">Translate text between 100+ languages with instant results and audio playback.</p>
+            </div>
+        </a>
+        
+
+        <!-- Simple Conversation -->
+        <a href="{% url 'simple_conversation' %}" class="group modern-card hover-lift">
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                        <span class="text-white text-lg sm:text-xl">🎧</span>
+                    </div>
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">🎧 Simple Conversation</h3>
+                <p class="text-gray-600 text-xs sm:text-sm">Hold to speak in your language, hear the translation in theirs. No rooms or turns needed.</p>
+            </div>
+        </a>
+        
+        <!-- Image Translation -->
+        <a href="{% url 'image_translation' %}" class="group modern-card hover-lift">
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                        <span class="text-white text-lg sm:text-xl">📷</span>
+                    </div>
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Image Translation</h3>
+                <p class="text-gray-600 text-xs sm:text-sm">Extract text from images using OCR and translate it to your preferred language.</p>
+            </div>
+        </a>
+        
+        <!-- Text Summarization -->
+        <a href="{% url 'summarize' %}" class="group modern-card hover-lift">
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                        <span class="text-white text-lg sm:text-xl">📄</span>
+                    </div>
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Text Summarization</h3>
+                <p class="text-gray-600 text-xs sm:text-sm">Summarize long texts, extract keywords, and analyze sentiment using AI.</p>
+            </div>
+        </a>
+
+        <!-- Video Summarizer -->
+        <a href="{% url 'video_upload' %}" class="group modern-card hover-lift">
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                        <span class="text-white text-lg sm:text-xl">🎬</span>
+                    </div>
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Video Summarizer</h3>
+                <p class="text-gray-600 text-xs sm:text-sm">Upload videos or paste URLs (YouTube, Vimeo, etc.) to extract transcripts, generate AI-powered summaries, and analyze content.</p>
+            </div>
+        </a>
+        
+        <!-- Translation History -->
+        <a href="{% url 'history' %}" class="group modern-card hover-lift">
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                        <span class="text-white text-lg sm:text-xl">📚</span>
+                    </div>
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Translation History</h3>
+                <p class="text-gray-600 text-xs sm:text-sm">View and manage your past translations, conversations, and summaries.</p>
+            </div>
+        </a>
+        
+        <!-- Language Support -->
+        <div class="group bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl shadow-lg border border-gray-200">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-gray-500 to-gray-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white text-xl">🌍</span>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">100+ Languages</h3>
+                <p class="text-gray-600 text-sm mb-4">Support for major world languages including Indian, European, Asian, and African languages.</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">English</span>
+                    <span class="px-2 py-1 bg-secondary-100 text-secondary-800 text-xs rounded-full">Hindi</span>
+                    <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Spanish</span>
+                    <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">French</span>
+                    <span class="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">German</span>
+                    <span class="px-2 py-1 bg-pink-100 text-pink-800 text-xs rounded-full">Chinese</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity Section -->
+    <div class="grid grid-cols-1 gap-8">
+        <!-- Recent Translations -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-gray-900">Recent Translations</h2>
+                    <a href="{% url 'history' %}" class="text-primary-600 hover:text-primary-500 text-sm font-medium">View all</a>
+                </div>
+            </div>
+            <div class="p-6">
+                {% if recent_translations %}
+                    <div class="space-y-4">
+                        {% for translation in recent_translations %}
+                        <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                {% if translation.translation_type == 'text' %}
+                                    <span class="text-primary-600 text-sm">📝</span>
+                                {% elif translation.translation_type == 'conversation' %}
+                                    <span class="text-primary-600 text-sm">🎤</span>
+                                {% elif translation.translation_type == 'image' %}
+                                    <span class="text-primary-600 text-sm">📷</span>
+                                {% else %}
+                                    <span class="text-primary-600 text-sm">📄</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ translation.original_text|truncatechars:50 }}</p>
+                                <p class="text-xs text-gray-500">{{ translation.translation_type|title }} • {{ translation.created_at|timesince }} ago</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-gray-400 text-2xl">📝</span>
+                        </div>
+                        <p class="text-gray-500">No translations yet</p>
+                        <p class="text-sm text-gray-400">Start translating to see your history here</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

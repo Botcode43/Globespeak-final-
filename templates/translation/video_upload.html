@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Video Upload - Globespeak{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <!-- Header -->
+    <div class="mb-6 sm:mb-8 fade-in">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">🎬 Video Summarizer</h1>
+        <p class="text-gray-600 text-sm sm:text-base">Upload a video to extract transcripts and generate AI-powered summaries.</p>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="modern-card mb-6 sm:mb-8">
+        <div class="p-4 sm:p-6">
+            <form method="post" enctype="multipart/form-data" class="space-y-4 sm:space-y-6">
+                {% csrf_token %}
+                
+                <!-- Source Type Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Choose Video Source</label>
+                    <div class="flex space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="source_type" value="upload" checked class="mr-2" onchange="toggleSourceType()">
+                            <span class="text-sm">📁 Upload File</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="source_type" value="url" class="mr-2" onchange="toggleSourceType()">
+                            <span class="text-sm">🔗 Video URL</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Title Input -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                        Video Title *
+                    </label>
+                    <input type="text" 
+                           id="title" 
+                           name="title" 
+                           required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                           placeholder="Enter a descriptive title for your video">
+                </div>
+
+                <!-- Description Input -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                        Description (Optional)
+                    </label>
+                    <textarea id="description" 
+                              name="description" 
+                              rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                              placeholder="Add a brief description of the video content"></textarea>
+                </div>
+
+                <!-- File Upload (shown by default) -->
+                <div id="file-upload-section">
+                    <label for="video_file" class="block text-sm font-medium text-gray-700 mb-2">
+                        Video File *
+                    </label>
+                    <div class="relative">
+                        <input type="file" 
+                               id="video_file" 
+                               name="video_file" 
+                               accept="video/*"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Supported formats: MP4, AVI, MOV, WMV, FLV, WebM (Max size: 100MB)
+                    </p>
+                </div>
+
+                <!-- URL Input (hidden by default) -->
+                <div id="url-input-section" style="display: none;">
+                    <label for="video_url" class="block text-sm font-medium text-gray-700 mb-2">
+                        Video URL *
+                    </label>
+                    <div class="relative">
+                        <input type="url" 
+                               id="video_url" 
+                               name="video_url" 
+                               placeholder="https://www.youtube.com/watch?v=..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors">
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Supported platforms: YouTube, Vimeo, Dailymotion, Twitch, Facebook, Instagram, TikTok, Twitter, LinkedIn
+                    </p>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                    <button type="submit" 
+                            class="flex-1 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:from-primary-600 hover:to-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                        <span class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            Upload & Process Video
+                        </span>
+                    </button>
+                    
+                    <a href="{% url 'video_history' %}" 
+                       class="flex-1 sm:flex-none bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 text-center">
+                        View History
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Features Info -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div class="modern-card">
+            <div class="p-4 sm:p-6">
+                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-3">
+                    <span class="text-white text-lg">🎤</span>
+                </div>
+                <h3 class="text-base font-semibold text-gray-900 mb-2">Speech Recognition</h3>
+                <p class="text-gray-600 text-sm">Advanced Whisper AI extracts accurate transcripts from your video audio.</p>
+            </div>
+        </div>
+
+        <div class="modern-card">
+            <div class="p-4 sm:p-6">
+                <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mb-3">
+                    <span class="text-white text-lg">📝</span>
+                </div>
+                <h3 class="text-base font-semibold text-gray-900 mb-2">AI Summarization</h3>
+                <p class="text-gray-600 text-sm">BART model generates concise, meaningful summaries of your video content.</p>
+            </div>
+        </div>
+
+        <div class="modern-card">
+            <div class="p-4 sm:p-6">
+                <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mb-3">
+                    <span class="text-white text-lg">📊</span>
+                </div>
+                <h3 class="text-base font-semibold text-gray-900 mb-2">Analytics</h3>
+                <p class="text-gray-600 text-sm">Get duration, word counts, and detailed insights about your video content.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle between file upload and URL input
+function toggleSourceType() {
+    const fileSection = document.getElementById('file-upload-section');
+    const urlSection = document.getElementById('url-input-section');
+    const fileInput = document.getElementById('video_file');
+    const urlInput = document.getElementById('video_url');
+    const submitButton = document.querySelector('button[type="submit"]');
+    
+    const sourceType = document.querySelector('input[name="source_type"]:checked').value;
+    
+    if (sourceType === 'upload') {
+        fileSection.style.display = 'block';
+        urlSection.style.display = 'none';
+        fileInput.required = true;
+        urlInput.required = false;
+        submitButton.innerHTML = `
+            <span class="flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                Upload & Process Video
+            </span>
+        `;
+    } else {
+        fileSection.style.display = 'none';
+        urlSection.style.display = 'block';
+        fileInput.required = false;
+        urlInput.required = true;
+        submitButton.innerHTML = `
+            <span class="flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                </svg>
+                Process Video URL
+            </span>
+        `;
+    }
+}
+
+// File upload validation
+document.getElementById('video_file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    
+    if (file && file.size > maxSize) {
+        alert('File size must be less than 100MB');
+        e.target.value = '';
+    }
+    
+    // Update file name display
+    if (file) {
+        const fileName = file.name;
+        const titleInput = document.getElementById('title');
+        if (!titleInput.value) {
+            // Auto-fill title from filename
+            const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+            titleInput.value = nameWithoutExt;
+        }
+    }
+});
+
+// URL validation
+document.getElementById('video_url').addEventListener('input', function(e) {
+    const url = e.target.value;
+    const titleInput = document.getElementById('title');
+    
+    if (url && !titleInput.value) {
+        // Try to extract title from URL
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            titleInput.value = 'YouTube Video';
+        } else if (url.includes('vimeo.com')) {
+            titleInput.value = 'Vimeo Video';
+        } else {
+            titleInput.value = 'Online Video';
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+
+{% block title %}Translation History - Globespeak{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Translation History</h1>
+        <p class="text-gray-600">View and manage your past translations, conversations, and summaries.</p>
+    </div>
+    
+    <!-- Filters -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 mb-8">
+        <div class="p-6">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center space-x-2">
+                    <label for="typeFilter" class="text-sm font-medium text-gray-700">Filter by type:</label>
+                    <select id="typeFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <option value="">All Types</option>
+                        <option value="text" {% if selected_type == 'text' %}selected{% endif %}>Text Translation</option>
+                        <option value="conversation" {% if selected_type == 'conversation' %}selected{% endif %}>Real-time Chat</option>
+                        <option value="image" {% if selected_type == 'image' %}selected{% endif %}>Image Translation</option>
+                        <option value="summarize" {% if selected_type == 'summarize' %}selected{% endif %}>Text Summarization</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <label for="dateFilter" class="text-sm font-medium text-gray-700">Filter by date:</label>
+                    <select id="dateFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+                
+                <button id="clearFilters" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- History List -->
+    <div class="space-y-6">
+        {% if translations %}
+            {% for translation in translations %}
+            <div class="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-4 flex-1">
+                            <!-- Type Icon -->
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0
+                                {% if translation.translation_type == 'text' %}bg-primary-100
+                                {% elif translation.translation_type == 'conversation' %}bg-secondary-100
+                                {% elif translation.translation_type == 'image' %}bg-purple-100
+                                {% else %}bg-orange-100{% endif %}">
+                                {% if translation.translation_type == 'text' %}
+                                    <span class="text-primary-600 text-xl">📝</span>
+                                {% elif translation.translation_type == 'conversation' %}
+                                    <span class="text-secondary-600 text-xl">🎤</span>
+                                {% elif translation.translation_type == 'image' %}
+                                    <span class="text-purple-600 text-xl">📷</span>
+                                {% else %}
+                                    <span class="text-orange-600 text-xl">📄</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Content -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h3 class="text-lg font-semibold text-gray-900">
+                                        {{ translation.translation_type|title }} Translation
+                                    </h3>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full
+                                        {% if translation.translation_type == 'text' %}bg-primary-100 text-primary-800
+                                        {% elif translation.translation_type == 'conversation' %}bg-secondary-100 text-secondary-800
+                                        {% elif translation.translation_type == 'image' %}bg-purple-100 text-purple-800
+                                        {% else %}bg-orange-100 text-orange-800{% endif %}">
+                                        {{ translation.translation_type }}
+                                    </span>
+                                </div>
+                                
+                                <!-- Original Text -->
+                                <div class="mb-3">
+                                    <p class="text-sm text-gray-600 mb-1">Original ({{ translation.source_language|upper }}):</p>
+                                    <p class="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                        {{ translation.original_text|truncatechars:200 }}
+                                    </p>
+                                </div>
+                                
+                                <!-- Translated Text -->
+                                {% if translation.translated_text %}
+                                <div class="mb-3">
+                                    <p class="text-sm text-gray-600 mb-1">Translation ({{ translation.target_language|upper }}):</p>
+                                    <p class="text-gray-900 bg-primary-50 p-3 rounded-lg border border-primary-200">
+                                        {{ translation.translated_text|truncatechars:200 }}
+                                    </p>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Summary (for summarization) -->
+                                {% if translation.summary %}
+                                <div class="mb-3">
+                                    <p class="text-sm text-gray-600 mb-1">Summary:</p>
+                                    <p class="text-gray-900 bg-orange-50 p-3 rounded-lg border border-orange-200">
+                                        {{ translation.summary }}
+                                    </p>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Metadata -->
+                                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                    <span>{{ translation.created_at|date:"M d, Y H:i" }}</span>
+                                    <span>•</span>
+                                    <span>{{ translation.source_language|upper }} → {{ translation.target_language|upper }}</span>
+                                    {% if translation.audio_file %}
+                                    <span>•</span>
+                                    <span class="text-green-600">Audio available</span>
+                                    {% endif %}
+                                    {% if translation.image_file %}
+                                    <span>•</span>
+                                    <span class="text-blue-600">Image available</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex items-center space-x-2 ml-4">
+                            <button onclick="copyToClipboard('{{ translation.translated_text|escapejs }}')" 
+                                    class="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                    title="Copy translation">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                            </button>
+                            
+                            {% if translation.audio_file %}
+                            <button onclick="playAudio('{{ translation.audio_file.url }}')" 
+                                    class="p-2 text-gray-400 hover:text-green-600 transition-colors duration-200"
+                                    title="Play audio">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                                </svg>
+                            </button>
+                            {% endif %}
+                            
+                            {% if translation.image_file %}
+                            <button onclick="viewImage('{{ translation.image_file.url }}')" 
+                                    class="p-2 text-gray-400 hover:text-blue-600 transition-colors duration-200"
+                                    title="View image">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </button>
+                            {% endif %}
+                            
+                            <button onclick="showFullText({{ translation.id }})" 
+                                    class="p-2 text-gray-400 hover:text-primary-600 transition-colors duration-200"
+                                    title="View full text">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+                <div class="p-12 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No translations yet</h3>
+                    <p class="text-gray-500 mb-6">Start translating to see your history here.</p>
+                    <div class="flex justify-center space-x-4">
+                        <a href="{% url 'text_translation' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors duration-200">
+                            Text Translation
+                        </a>
+                        <a href="{% url 'simple_conversation' %}" class="bg-secondary-600 hover:bg-secondary-700 text-white px-6 py-3 rounded-lg transition-colors duration-200">
+                            Real-time Chat
+                        </a>
+                        <a href="{% url 'image_translation' %}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors duration-200">
+                            Image Translation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination (if needed) -->
+    {% if translations.has_other_pages %}
+    <div class="mt-8 flex justify-center">
+        <nav class="flex items-center space-x-2">
+            {% if translations.has_previous %}
+                <a href="?page={{ translations.previous_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    Previous
+                </a>
+            {% endif %}
+            
+            <span class="px-3 py-2 text-sm font-medium text-gray-700 bg-primary-50 border border-primary-300 rounded-md">
+                Page {{ translations.number }} of {{ translations.paginator.num_pages }}
+            </span>
+            
+            {% if translations.has_next %}
+                <a href="?page={{ translations.next_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    Next
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Full Text Modal -->
+<div id="fullTextModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Full Translation Details</h3>
+                <button onclick="closeFullTextModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="fullTextContent" class="space-y-4">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div id="imageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Image</h3>
+                <button onclick="closeImageModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="text-center">
+                <img id="modalImage" src="" alt="Image" class="max-w-full h-auto rounded-lg">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Filter functionality
+document.getElementById('typeFilter').addEventListener('change', function() {
+    const type = this.value;
+    const url = new URL(window.location);
+    if (type) {
+        url.searchParams.set('type', type);
+    } else {
+        url.searchParams.delete('type');
+    }
+    window.location.href = url.toString();
+});
+
+document.getElementById('clearFilters').addEventListener('click', function() {
+    window.location.href = '{% url "history" %}';
+});
+
+// Utility functions
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success message
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+        button.classList.add('text-green-600');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('text-green-600');
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Could not copy text: ', err);
+        alert('Failed to copy text to clipboard');
+    });
+}
+
+function playAudio(audioUrl) {
+    const audio = new Audio(audioUrl);
+    audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+        alert('Failed to play audio');
+    });
+}
+
+function viewImage(imageUrl) {
+    document.getElementById('modalImage').src = imageUrl;
+    document.getElementById('imageModal').classList.remove('hidden');
+}
+
+function closeImageModal() {
+    document.getElementById('imageModal').classList.add('hidden');
+}
+
+function showFullText(translationId) {
+    // This would typically make an AJAX request to get full text
+    // For now, we'll show a placeholder
+    const content = document.getElementById('fullTextContent');
+    content.innerHTML = `
+        <div class="text-center py-8">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-500">Loading full text...</p>
+        </div>
+    `;
+    
+    document.getElementById('fullTextModal').classList.remove('hidden');
+    
+    // Simulate loading (replace with actual AJAX call)
+    setTimeout(() => {
+        content.innerHTML = `
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">Original Text</h4>
+                    <p class="text-gray-700 bg-gray-50 p-3 rounded-lg">Full original text would be displayed here...</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">Translation</h4>
+                    <p class="text-gray-700 bg-primary-50 p-3 rounded-lg">Full translation would be displayed here...</p>
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+function closeFullTextModal() {
+    document.getElementById('fullTextModal').classList.add('hidden');
+}
+
+// Close modals when clicking outside
+document.getElementById('fullTextModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeFullTextModal();
+    }
+});
+
+document.getElementById('imageModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+</script>
+{% endblock %}

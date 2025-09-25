@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+
+{% block title %}Text Summarization - Globespeak{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Text Summarization</h1>
+        <p class="text-gray-600">Summarize long texts, extract keywords, and analyze sentiment using AI.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Input Form -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">Text to Summarize</h2>
+            </div>
+            <div class="p-6">
+                <form method="post" id="summarizeForm">
+                    {% csrf_token %}
+                    
+                    <!-- Text Input -->
+                    <div class="mb-6">
+                        <label for="text" class="block text-sm font-medium text-gray-700 mb-2">
+                            Enter Text
+                        </label>
+                        <textarea id="text" name="text" rows="12" required
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 resize-none"
+                                  placeholder="Paste or type the text you want to summarize here...">{{ original_text|default:"" }}</textarea>
+                        <p class="text-sm text-gray-500 mt-2">Character count: <span id="charCount">0</span></p>
+                    </div>
+                    
+                    <!-- Summary Length -->
+                    <div class="mb-6">
+                        <label for="max_length" class="block text-sm font-medium text-gray-700 mb-2">
+                            Summary Length
+                        </label>
+                        <select id="max_length" name="max_length" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200">
+                            <option value="100" {% if max_length == 100 %}selected{% endif %}>Short (100 words)</option>
+                            <option value="150" {% if max_length == 150 %}selected{% endif %}>Medium (150 words)</option>
+                            <option value="200" {% if max_length == 200 %}selected{% endif %}>Long (200 words)</option>
+                            <option value="300" {% if max_length == 300 %}selected{% endif %}>Very Long (300 words)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            class="w-full bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <span class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Summarize Text
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Results -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">Analysis Results</h2>
+            </div>
+            <div class="p-6">
+                {% if summary %}
+                    <!-- Summary -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-medium text-gray-900">Summary</h3>
+                            <button onclick="copyToClipboard('{{ summary|escapejs }}')" 
+                                    class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                Copy
+                            </button>
+                        </div>
+                        <div class="p-4 bg-primary-50 rounded-lg border border-primary-200">
+                            <p class="text-gray-900 leading-relaxed">{{ summary }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Keywords -->
+                    {% if keywords %}
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">Keywords</h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for keyword in keywords %}
+                            <span class="px-3 py-1 bg-secondary-100 text-secondary-800 text-sm rounded-full">
+                                {{ keyword }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Sentiment Analysis -->
+                    {% if sentiment %}
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">Sentiment Analysis</h3>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-600">Sentiment:</span>
+                                <span class="px-3 py-1 text-sm font-medium rounded-full
+                                    {% if sentiment.sentiment == 'positive' %}bg-green-100 text-green-800
+                                    {% elif sentiment.sentiment == 'negative' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ sentiment.sentiment|title }}
+                                </span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-600">Confidence:</span>
+                                <div class="w-20 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-primary-600 h-2 rounded-full" style="width: {{ sentiment.confidence|floatformat:0 }}%"></div>
+                                </div>
+                                <span class="text-sm text-gray-600">{{ sentiment.confidence|floatformat:0 }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Statistics -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-gray-900">{{ original_text|length }}</div>
+                            <div class="text-sm text-gray-600">Original Characters</div>
+                        </div>
+                        <div class="bg-primary-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-primary-900">{{ summary|length }}</div>
+                            <div class="text-sm text-primary-600">Summary Characters</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Ready to summarize</h3>
+                        <p class="text-gray-500">Enter text in the form and click summarize to see results here.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features Section -->
+    <div class="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">🚀 AI-Powered Features</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <span class="text-blue-600 text-xl">📄</span>
+                </div>
+                <h4 class="font-medium text-gray-900 mb-2">Smart Summarization</h4>
+                <p class="text-sm text-gray-600">AI-powered text summarization that captures key points and maintains context.</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <span class="text-green-600 text-xl">🔑</span>
+                </div>
+                <h4 class="font-medium text-gray-900 mb-2">Keyword Extraction</h4>
+                <p class="text-sm text-gray-600">Automatically identify and extract the most important keywords from your text.</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <span class="text-purple-600 text-xl">😊</span>
+                </div>
+                <h4 class="font-medium text-gray-900 mb-2">Sentiment Analysis</h4>
+                <p class="text-sm text-gray-600">Analyze the emotional tone and sentiment of your text content.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <a href="{% url 'text_translation' %}" class="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100 p-6">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    <span class="text-white text-xl">📝</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Text Translation</h3>
+                    <p class="text-gray-600 text-sm">Translate text between 100+ languages</p>
+                </div>
+            </div>
+        </a>
+        
+        <a href="{% url 'simple_conversation' %}" class="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100 p-6">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    <span class="text-white text-xl">🎤</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Real-time Chat</h3>
+                    <p class="text-gray-600 text-sm">Have conversations with instant translation</p>
+                </div>
+            </div>
+        </a>
+        
+        <a href="{% url 'history' %}" class="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100 p-6">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    <span class="text-white text-xl">📚</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Translation History</h3>
+                    <p class="text-gray-600 text-sm">View your past translations and summaries</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success message
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Copied!';
+        button.classList.add('bg-green-600', 'hover:bg-green-700', 'text-white');
+        button.classList.remove('bg-white', 'hover:bg-gray-50', 'text-gray-700');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('bg-green-600', 'hover:bg-green-700', 'text-white');
+            button.classList.add('bg-white', 'hover:bg-gray-50', 'text-gray-700');
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Could not copy text: ', err);
+        alert('Failed to copy text to clipboard');
+    });
+}
+
+// Character count functionality
+const textArea = document.getElementById('text');
+const charCount = document.getElementById('charCount');
+
+textArea.addEventListener('input', function() {
+    const count = this.value.length;
+    charCount.textContent = count.toLocaleString();
+    
+    // Change color based on length
+    if (count > 5000) {
+        charCount.classList.add('text-red-600');
+        charCount.classList.remove('text-gray-500');
+    } else if (count > 2000) {
+        charCount.classList.add('text-yellow-600');
+        charCount.classList.remove('text-gray-500', 'text-red-600');
+    } else {
+        charCount.classList.add('text-gray-500');
+        charCount.classList.remove('text-yellow-600', 'text-red-600');
+    }
+});
+
+// Auto-resize textarea
+textArea.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+});
+
+// Form submission with loading state
+document.getElementById('summarizeForm').addEventListener('submit', function(e) {
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    
+    submitButton.innerHTML = `
+        <span class="flex items-center justify-center">
+            <div class="loading-spinner mr-2"></div>
+            Processing...
+        </span>
+    `;
+    submitButton.disabled = true;
+    
+    // Re-enable button after 30 seconds as fallback
+    setTimeout(() => {
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+    }, 30000);
+});
+
+// Initialize character count on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const count = textArea.value.length;
+    charCount.textContent = count.toLocaleString();
+});
+</script>
+{% endblock %}

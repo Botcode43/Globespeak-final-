@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Video Processing - GlobeSpeak{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">🎬 Video Processing</h1>
+            <p class="text-gray-600">Your video is being processed. Please wait...</p>
+        </div>
+
+        <!-- Processing Card -->
+        <div class="modern-card">
+            <div class="p-8 text-center">
+                <!-- Animated Spinner -->
+                <div class="mb-6">
+                    <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500"></div>
+                </div>
+
+                <!-- Video Info -->
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ video.title }}</h2>
+                    <p class="text-gray-600">{{ video.video_url }}</p>
+                </div>
+
+                <!-- Processing Steps -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Processing Steps:</h3>
+                    <div class="space-y-3 text-left max-w-md mx-auto">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                                <span class="text-white text-sm">✓</span>
+                            </div>
+                            <span class="text-gray-700">Downloading video from URL</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center mr-3">
+                                <span class="text-white text-sm">⏳</span>
+                            </div>
+                            <span class="text-gray-700">Extracting audio from video</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                <span class="text-gray-600 text-sm">⏳</span>
+                            </div>
+                            <span class="text-gray-500">Transcribing audio to text</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                <span class="text-gray-600 text-sm">⏳</span>
+                            </div>
+                            <span class="text-gray-500">Generating AI summary</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Estimate -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-blue-800 font-medium">Estimated time: 5-15 minutes</span>
+                    </div>
+                    <p class="text-blue-600 text-sm mt-1">This depends on video length and your internet speed</p>
+                </div>
+
+                <!-- Important Notice -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-yellow-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <div class="text-left">
+                            <p class="text-yellow-800 font-medium">Important:</p>
+                            <p class="text-yellow-700 text-sm">Please DO NOT close this page or refresh. The processing will continue in the background and you'll be redirected automatically when complete.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back Button -->
+                <div class="mt-8">
+                    <a href="{% url 'video_history' %}" 
+                       class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Back to Video History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto-start processing and refresh script -->
+<script>
+    // Start processing immediately
+    fetch('{% url "video_process_url" video.id %}', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    }).then(response => {
+        if (response.ok) {
+            // If processing is complete, redirect to results
+            window.location.href = '{% url "video_detail" video.id %}';
+        } else {
+            // If there's an error, redirect to upload page
+            window.location.href = '{% url "video_upload" %}';
+        }
+    }).catch(error => {
+        console.error('Processing error:', error);
+        // Auto-refresh every 30 seconds to check if processing is complete
+        setTimeout(function() {
+            window.location.reload();
+        }, 30000);
+    });
+</script>
+{% endblock %}
