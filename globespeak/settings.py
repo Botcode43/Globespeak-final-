@@ -155,7 +155,7 @@ CHANNEL_LAYERS = {
 }
 
 # Environment variables
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyBZeYW3yvk9iPIZRIz0pl6pEdgDgCZMN20')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 
 # Logging
 LOGGING = {
@@ -178,4 +178,5 @@ LOGGING = {
 }
 
 # Create logs directory if it doesn't exist
+
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
